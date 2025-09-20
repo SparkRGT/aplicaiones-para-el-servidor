@@ -9,8 +9,8 @@ export interface ICliente {
 // --- Mesa ---
 export interface IMesa {
   id_mesa: number;
-  numero: string; // Ejemplo: "M1", "M2", "VIP-3"
-  capacidad: number; // Número de personas que caben en la mesa
+  numero: string; 
+  capacidad: number; 
   estado: 'libre' | 'ocupada' | 'reservada';
 }
 
@@ -31,12 +31,11 @@ export interface IReserva {
 export interface IFilaVirtual {
   id_fila: number;
   id_cliente: number;
-  posicion: number; // Orden en la fila
+  posicion: number; 
   estado: 'esperando' | 'notificado' | 'asignado' | 'cancelado';
   cliente?: ICliente;
 }
 
-// --- Restaurante ---
 export interface IRestaurante {
   id_restaurante: number;
   nombre: string;
@@ -44,6 +43,30 @@ export interface IRestaurante {
   telefono: string;
   mesas: IMesa[];
   reservas: IReserva[];
+  menu: IMenu;
+}
+
+// --- Categoría del Menú ---
+export interface ICategoriaMenu {
+  id_categoria: number;
+  nombre: string; 
+}
+
+// --- Plato o Comida ---
+export interface IPlato {
+  id_plato: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  disponible: boolean; 
+  categoria: ICategoriaMenu;
+}
+
+// --- Menú completo ---
+export interface IMenu {
+  id_menu: number;
+  fecha: Date; 
+  platos: IPlato[];
 }
 
 
