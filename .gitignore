@@ -1,0 +1,55 @@
+# Node
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+.cache/
+.parcel-cache/
+*.local
+
+# TypeScript compiled
+**/*.js
+**/*.js.map
+
+# Lockfiles (optional - keep if you prefer to commit locks)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock

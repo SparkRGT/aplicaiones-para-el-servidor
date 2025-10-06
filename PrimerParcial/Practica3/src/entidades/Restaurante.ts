@@ -17,6 +17,5 @@ export class Restaurante {
 
   // Relación: un restaurante tiene muchas mesas
   @OneToMany(() => Mesa, (mesa) => mesa.restaurante)
-  // Use `any[]` to avoid circular initialization issues with reflect-metadata in ESM
-  mesas!: any[];
+  mesas!: Mesa[];
 }
