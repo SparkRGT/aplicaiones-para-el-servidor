@@ -1,0 +1,60 @@
+# Docker Compose para desarrollo
+# Usa volúmenes para hot-reload y no compila las imágenes
+
+services:
+  # Base de datos para el microservicio de Menú
+  postgres-menu:
+    image: postgres:15-alpine
+    container_name: restaurante-postgres-menu-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurante_menu_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-menu-data-dev:/var/lib/postgresql/data
+      - ./scripts/init-menu-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - restaurante-network-dev
+
+  # Base de datos para el microservicio de Reservas
+  postgres-reservas:
+    image: postgres:15-alpine
+    container_name: restaurante-postgres-reservas-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurante_reservas_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-reservas-data-dev:/var/lib/postgresql/data
+      - ./scripts/init-reservas-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - restaurante-network-dev
+
+  # RabbitMQ para Event-Driven Architecture
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: restaurante-rabbitmq-dev
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data-dev:/var/lib/rabbitmq
+    networks:
+      - restaurante-network-dev
+
+volumes:
+  postgres-menu-data-dev:
+  postgres-reservas-data-dev:
+  rabbitmq-data-dev:
+
+networks:
+  restaurante-network-dev:
+    driver: bridge
+

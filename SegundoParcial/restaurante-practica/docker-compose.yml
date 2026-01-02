@@ -1,0 +1,161 @@
+services:
+  # Base de datos para el microservicio de Menú
+  postgres-menu:
+    image: postgres:15-alpine
+    container_name: restaurante-postgres-menu
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurante_menu_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-menu-data:/var/lib/postgresql/data
+      - ./scripts/init-menu-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - restaurante-network
+
+  # Base de datos para el microservicio de Reservas
+  postgres-reservas:
+    image: postgres:15-alpine
+    container_name: restaurante-postgres-reservas
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurante_reservas_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-reservas-data:/var/lib/postgresql/data
+      - ./scripts/init-reservas-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - restaurante-network
+
+  # RabbitMQ para Event-Driven Architecture
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: restaurante-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - restaurante-network
+
+  # Microservicio de Menú
+  menu-service:
+    build:
+      context: ./microservicio-menu
+      dockerfile: Dockerfile
+    container_name: restaurante-menu-service
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: postgres-menu
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: restaurante_menu_db
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres-menu:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - restaurante-network
+    restart: unless-stopped
+
+  # Microservicio de Reservas
+  reservas-service:
+    build:
+      context: ./microservicio-reservas
+      dockerfile: Dockerfile
+    container_name: restaurante-reservas-service
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DB_HOST: postgres-reservas
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: restaurante_reservas_db
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres-reservas:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - restaurante-network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: restaurante-api-gateway
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MENU_SERVICE_URL: http://menu-service:3001
+      RESERVAS_SERVICE_URL: http://reservas-service:3002
+    ports:
+      - "3000:3000"
+    depends_on:
+      menu-service:
+        condition: service_healthy
+      reservas-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - restaurante-network
+    restart: unless-stopped
+
+volumes:
+  postgres-menu-data:
+  postgres-reservas-data:
+  rabbitmq-data:
+
+networks:
+  restaurante-network:
+    driver: bridge
+
