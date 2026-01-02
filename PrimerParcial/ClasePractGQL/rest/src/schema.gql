@@ -1,0 +1,22 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ClienteModel {
+  correo: String!
+  id: ID!
+  nombre: String!
+}
+
+type DispositivoModel {
+  id: ID!
+  nombre: String!
+  tipo: String!
+}
+
+type Query {
+  cliente(id: String!): ClienteModel
+  clientes: [ClienteModel!]!
+  dispositivo(id: String!): DispositivoModel
+  dispositivos: [DispositivoModel!]!
+}
