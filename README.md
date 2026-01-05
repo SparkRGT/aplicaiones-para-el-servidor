@@ -23,3 +23,4 @@ Restaurante→ Menu(OneToOne o ManyToOne, según la lógica)
 Reserva(referenciada luego) usará Clientey Mesa.
 
 Lógica CRUD de restaurante, mesas y clientes.
+Link del video de la practica 2: https://youtu.be/0ZA-xQ9WcY0
