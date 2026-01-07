@@ -1,6 +1,28 @@
 # Sistema de Microservicios con IA - Gestión de Reservas y Menús de Restaurante
 
-## 📋 Descripción General
+## � Análisis y Resumen Ejecutivo
+
+**Qué es:** Un proyecto modular basado en NestJS que implementa una arquitectura de microservicios para gestionar reservas y menús de un restaurante, con integración de IA (Gemini), uso de RabbitMQ para mensajería y Supabase para webhooks/servicios externos.
+
+**Estructura clave:** `gateway/`, `menu-ms/`, `reserva-ms/`, `mcp-server/` y `supabase/` (DB y funciones). Cada servicio es autónomo (propio `package.json`, `tsconfig`, tests y Dockerfile).
+
+**Patrones y tecnologías:**
+- Microservicios (NestJS) con enrutamiento via Gateway
+- Mensajería asíncrona: RabbitMQ (colas `menu_queue`, `reserva_queue`)
+- Base de datos: PostgreSQL (DBs separadas por servicio; `init.sql` inicializa esquemas)
+- MCP Server: servidor de herramientas JSON-RPC para que Gemini llame a funciones/acciones
+- Contenerización: Docker + docker-compose para orquestación local
+- Integración con Supabase (webhooks y funciones)
+
+**Aspectos importantes y recomendaciones rápidas:**
+- Excelente separación por dominio y uso de herramientas reutilizables en `mcp-server/tools/`.
+- Añadir `README.md` por microservicio (si faltan) y un `.env.example` centralizado.
+- Documentar contratos (DTOs/endpoints) y exponer Swagger/OpenAPI en `gateway` para facilitar integraciones.
+- Añadir CI (lint, build, test) y scripts para levantar partes del stack (ej. `make` o scripts npm en raíz).
+
+> A continuación se mantiene la documentación detallada del proyecto.
+
+## �📋 Descripción General
 
 Este es un sistema completo de microservicios basado en **NestJS** que implementa una arquitectura distribuida con integración de **Inteligencia Artificial (Gemini)** y **Model Context Protocol (MCP)**. El sistema permite gestionar reservas de mesas y menús de restaurante de manera distribuida, con capacidades de IA para interacción natural.
 
