@@ -86,22 +86,24 @@ Este es un sistema completo de microservicios basado en **NestJS** que implement
    ```
 
    > 📝 Ver [ENV_VARIABLES.md](./ENV_VARIABLES.md) para documentación completa de variables
+   > 
+   > ⚠️ **IMPORTANTE**: Antes de continuar, configura Supabase y Gemini AI siguiendo la guía en [CONFIGURACION_SUPABASE_GEMINI.md](./CONFIGURACION_SUPABASE_GEMINI.md)
 
 3. **Levantar los servicios**
 
-   ```bash
+```bash
    cd SegundoParcial/MCP-main
    
    # Limpiar volúmenes anteriores (opcional)
-   docker-compose down -v
-   
-   # Construir e iniciar todos los servicios
-   docker-compose up --build
-   ```
+docker-compose down -v
+
+# Construir e iniciar todos los servicios
+docker-compose up --build
+```
 
 4. **Verificar que los servicios estén corriendo**
 
-   - Gateway: `http://localhost:3000`
+- Gateway: `http://localhost:3000`
    - Reserva-MS: `http://localhost:3001`
    - Menu-MS: `http://localhost:3002`
    - RabbitMQ Management: `http://localhost:15672` (usuario: `guest`, contraseña: `guest`)
