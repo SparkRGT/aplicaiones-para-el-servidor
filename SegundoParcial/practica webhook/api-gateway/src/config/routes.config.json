@@ -1,0 +1,21 @@
+{
+  "microservices": [
+    {
+      "name": "microservicio-a",
+      "url": "http://localhost:3001",
+      "path": "/api/productos",
+      "description": "Gestión de productos"
+    },
+    {
+      "name": "microservicio-b",
+      "url": "http://localhost:3002",
+      "path": "/api/ordenes",
+      "description": "Gestión de órdenes"
+    }
+  ],
+  "webhooks": {
+    "url": "http://localhost:3003",
+    "path": "/webhooks",
+    "description": "Publicador de webhooks"
+  }
+}

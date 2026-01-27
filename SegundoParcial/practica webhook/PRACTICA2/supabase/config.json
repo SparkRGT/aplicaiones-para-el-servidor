@@ -1,0 +1,8 @@
+{
+  "project": {
+    "id": "YOUR_PROJECT_REF",
+    "name": "webhooks-circuit-breaker",
+    "organization_id": null,
+    "region": "us-east-1"
+  }
+}

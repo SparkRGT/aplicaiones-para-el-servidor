@@ -1,0 +1,52 @@
+{
+  "webhooks": {
+    "enabled": true,
+    "retryPolicy": {
+      "maxAttempts": 6,
+      "backoffType": "exponential",
+      "initialDelayMs": 60000,
+      "maxDelayMs": 43200000,
+      "timeoutMs": 10000
+    },
+    "circuitBreaker": {
+      "enabled": true,
+      "failureThreshold": 5,
+      "successThreshold": 2,
+      "timeout": 60000,
+      "halfOpenRequests": 1
+    },
+    "subscriptions": [
+      {
+        "eventType": "producto.creado",
+        "urls": [
+          {
+            "url": "${WEBHOOK_EVENT_LOGGER_URL}",
+            "secret": "${WEBHOOK_SECRET_LOGGER}"
+          },
+          {
+            "url": "${WEBHOOK_EXTERNAL_NOTIFIER_URL}",
+            "secret": "${WEBHOOK_SECRET_NOTIFIER}"
+          }
+        ]
+      },
+      {
+        "eventType": "producto.actualizado",
+        "urls": [
+          {
+            "url": "${WEBHOOK_EVENT_LOGGER_URL}",
+            "secret": "${WEBHOOK_SECRET_LOGGER}"
+          }
+        ]
+      },
+      {
+        "eventType": "producto.eliminado",
+        "urls": [
+          {
+            "url": "${WEBHOOK_EXTERNAL_NOTIFIER_URL}",
+            "secret": "${WEBHOOK_SECRET_NOTIFIER}"
+          }
+        ]
+      }
+    ]
+  }
+}

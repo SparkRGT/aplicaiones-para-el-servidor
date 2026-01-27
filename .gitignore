@@ -49,6 +49,10 @@ Thumbs.db
 **/*.js
 **/*.js.map
 
+# Large files
+*.rar
+*.zip
+
 # Lockfiles (optional - keep if you prefer to commit locks)
 # package-lock.json
 # pnpm-lock.yaml

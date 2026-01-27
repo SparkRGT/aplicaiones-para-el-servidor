@@ -1,0 +1,24 @@
+{
+  "rabbitmq": {
+    "uri": "amqp://guest:guest@rabbitmq:5672",
+    "exchange": "eventos",
+    "queue": "eventos-microservicio-b"
+  },
+  "events": [
+    {
+      "name": "orden.creada",
+      "description": "Se crea una nueva orden",
+      "notifyTelegram": true
+    },
+    {
+      "name": "orden.confirmada",
+      "description": "Se confirma una orden",
+      "notifyTelegram": true
+    },
+    {
+      "name": "orden.cancelada",
+      "description": "Se cancela una orden",
+      "notifyTelegram": true
+    }
+  ]
+}

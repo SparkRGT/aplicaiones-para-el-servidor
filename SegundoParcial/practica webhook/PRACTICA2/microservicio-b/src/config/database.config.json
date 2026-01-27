@@ -1,0 +1,22 @@
+{
+  "development": {
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5436,
+    "username": "postgres",
+    "password": "postgres123",
+    "database": "microservicio_b_db",
+    "logging": true,
+    "synchronize": true
+  },
+  "production": {
+    "type": "postgres",
+    "host": "postgres-b",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres123",
+    "database": "microservicio_b_db",
+    "logging": false,
+    "synchronize": false
+  }
+}

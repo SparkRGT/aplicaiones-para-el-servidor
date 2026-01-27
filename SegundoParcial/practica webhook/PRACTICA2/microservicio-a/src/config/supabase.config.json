@@ -1,0 +1,11 @@
+{
+  "supabaseUrl": "YOUR_SUPABASE_URL",
+  "supabaseAnonKey": "YOUR_SUPABASE_ANON_KEY",
+  "supabaseServiceKey": "YOUR_SUPABASE_SERVICE_KEY",
+  "edgeFunctions": {
+    "auditLogger": {
+      "url": "YOUR_SUPABASE_URL/functions/v1/audit-logger",
+      "enabled": true
+    }
+  }
+}

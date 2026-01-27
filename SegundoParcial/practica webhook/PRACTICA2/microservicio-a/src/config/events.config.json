@@ -1,0 +1,24 @@
+{
+  "rabbitmq": {
+    "uri": "amqp://guest:guest@rabbitmq:5672",
+    "exchange": "eventos",
+    "queue": "eventos-microservicio-a"
+  },
+  "events": [
+    {
+      "name": "producto.creado",
+      "description": "Se crea un nuevo producto",
+      "notifyTelegram": true
+    },
+    {
+      "name": "producto.actualizado",
+      "description": "Se actualiza un producto existente",
+      "notifyTelegram": true
+    },
+    {
+      "name": "producto.eliminado",
+      "description": "Se elimina un producto",
+      "notifyTelegram": true
+    }
+  ]
+}

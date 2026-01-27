@@ -1,0 +1,50 @@
+{
+  "development": {
+    "enabled": true,
+    "botToken": "${TELEGRAM_BOT_TOKEN}",
+    "chatId": "${TELEGRAM_CHAT_ID}",
+    "apiUrl": "https://api.telegram.org/bot",
+    "timeout": 5000,
+    "retries": 3
+  },
+  "production": {
+    "enabled": true,
+    "botToken": "${TELEGRAM_BOT_TOKEN}",
+    "chatId": "${TELEGRAM_CHAT_ID}",
+    "apiUrl": "https://api.telegram.org/bot",
+    "timeout": 10000,
+    "retries": 5
+  },
+  "webhookEvents": {
+    "producto.creado": {
+      "icon": "📦",
+      "title": "Nuevo Producto Creado",
+      "includeData": ["nombre", "precio", "stock"]
+    },
+    "producto.actualizado": {
+      "icon": "✏️",
+      "title": "Producto Actualizado",
+      "includeData": ["nombre", "precio", "stock"]
+    },
+    "producto.eliminado": {
+      "icon": "🗑️",
+      "title": "Producto Eliminado",
+      "includeData": ["nombre"]
+    },
+    "orden.creada": {
+      "icon": "🛒",
+      "title": "Nueva Orden Creada",
+      "includeData": ["orderId", "status", "totalAmount"]
+    },
+    "orden.confirmada": {
+      "icon": "✅",
+      "title": "Orden Confirmada",
+      "includeData": ["orderId", "totalAmount"]
+    },
+    "orden.cancelada": {
+      "icon": "❌",
+      "title": "Orden Cancelada",
+      "includeData": ["orderId"]
+    }
+  }
+}
