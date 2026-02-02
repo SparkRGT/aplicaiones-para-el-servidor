@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ClientProxy } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 import { Recup_Prestamo } from './entities/recup_prestamo.entity';
 import { CreateRecupPrestamoDto } from './dto/create-recup-prestamo.dto';
 import { UpdateRecupPrestamoDto } from './dto/update-recup-prestamo.dto';
@@ -9,39 +10,46 @@ import { UpdateRecupPrestamoDto } from './dto/update-recup-prestamo.dto';
 @Injectable()
 export class PrestamosService {
   private readonly logger = new Logger(PrestamosService.name);
-  private readonly N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/recup_prestamo.notificacion';
+  private readonly n8nWebhookUrl: string;
 
   constructor(
     @InjectRepository(Recup_Prestamo)
     private readonly prestamoRepository: Repository<Recup_Prestamo>,
     @Inject('AUDIT_SERVICE')
     private readonly auditClient: ClientProxy,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.n8nWebhookUrl = this.configService.get<string>('N8N_WEBHOOK_URL') || 'http://localhost:5678/webhook/recup_prestamo.notificacion';
+  }
 
   /**
-   * Envía notificación al webhook de n8n cuando cambia el estado de un préstamo
+   * Envía webhook a n8n para notificación de cambio de estado
    * Evento: recup_prestamo.notificacion
    */
-  private async sendN8nWebhook(payload: {
-    prestamoId: number;
-    recup_codigo: string;
-    estadoAnterior: string | null;
-    estadoNuevo: string;
-    lector: {
-      recup_nombreCompleto: string;
-      recup_email: string;
-      recup_telefono: string;
-    };
-    libro: {
-      recup_titulo: string;
-      recup_autor: string;
-    };
-    recup_fechaPrestamo: Date;
-    recup_fechaDevolucion: Date;
-    fechaCambio: Date;
-  }): Promise<void> {
+  private async sendWebhookToN8n(prestamo: Recup_Prestamo, estadoAnterior: string, estadoNuevo: string): Promise<void> {
     try {
-      const response = await fetch(this.N8N_WEBHOOK_URL, {
+      const payload = {
+        evento: 'recup_prestamo.estado-cambiado',
+        prestamoId: prestamo.prestamoId,
+        recup_codigo: prestamo.recup_codigo,
+        estadoAnterior,
+        estadoNuevo,
+        fechaCambio: new Date().toISOString(),
+        lector: prestamo.lector ? {
+          lectorId: prestamo.lector.lectorId,
+          recup_nombreCompleto: prestamo.lector.recup_nombreCompleto,
+          recup_email: prestamo.lector.recup_email,
+          recup_tipoLector: prestamo.lector.recup_tipoLector,
+        } : null,
+        libro: prestamo.libro ? {
+          libroId: prestamo.libro.libroId,
+          recup_titulo: prestamo.libro.recup_titulo,
+          recup_autor: prestamo.libro.recup_autor,
+          recup_isbn: prestamo.libro.recup_isbn,
+        } : null,
+      };
+
+      const response = await fetch(this.n8nWebhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,12 +58,13 @@ export class PrestamosService {
       });
 
       if (response.ok) {
-        this.logger.log(`Webhook recup_prestamo.notificacion enviado exitosamente para préstamo ${payload.prestamoId}`);
+        this.logger.log(`Webhook enviado exitosamente a n8n para préstamo ${prestamo.prestamoId}`);
       } else {
-        this.logger.warn(`Webhook n8n respondió con status ${response.status}`);
+        this.logger.warn(`Webhook a n8n respondió con status ${response.status}`);
       }
     } catch (error) {
-      this.logger.error(`Error al enviar webhook a n8n: ${error.message}`);
+      this.logger.error(`Error enviando webhook a n8n: ${error.message}`);
+      // No lanzamos el error para no afectar la operación principal
     }
   }
 
@@ -66,7 +75,7 @@ export class PrestamosService {
     // Cargar relaciones para el webhook
     const prestamoConRelaciones = await this.findOne(saved.prestamoId);
 
-    // Emitir evento de creación (estado inicial) a RabbitMQ para auditoría
+    // Emitir evento de creación (estado inicial) a RabbitMQ
     this.auditClient.emit('recup_prestamo.estado-cambiado', {
       prestamoId: saved.prestamoId,
       estadoAnterior: null,
@@ -75,25 +84,8 @@ export class PrestamosService {
       comentario: 'Préstamo creado',
     });
 
-    // Enviar notificación a n8n webhook (recup_prestamo.notificacion)
-    await this.sendN8nWebhook({
-      prestamoId: saved.prestamoId,
-      recup_codigo: saved.recup_codigo,
-      estadoAnterior: null,
-      estadoNuevo: saved.recup_estado || 'SOLICITADO',
-      lector: {
-        recup_nombreCompleto: prestamoConRelaciones.lector?.recup_nombreCompleto || '',
-        recup_email: prestamoConRelaciones.lector?.recup_email || '',
-        recup_telefono: prestamoConRelaciones.lector?.recup_telefono || '',
-      },
-      libro: {
-        recup_titulo: prestamoConRelaciones.libro?.recup_titulo || '',
-        recup_autor: prestamoConRelaciones.libro?.recup_autor || '',
-      },
-      recup_fechaPrestamo: saved.recup_fechaPrestamo,
-      recup_fechaDevolucion: saved.recup_fechaDevolucion,
-      fechaCambio: new Date(),
-    });
+    // Enviar webhook a n8n (recup_prestamo.notificacion)
+    await this.sendWebhookToN8n(prestamoConRelaciones, 'NINGUNO', saved.recup_estado || 'SOLICITADO');
 
     return saved;
   }
@@ -122,12 +114,12 @@ export class PrestamosService {
     Object.assign(prestamo, updatePrestamoDto);
     const updated = await this.prestamoRepository.save(prestamo);
 
-    // Si el estado cambió, emitir eventos
+    // Emitir evento si el estado cambió
     if (updatePrestamoDto.recup_estado && estadoAnterior !== updatePrestamoDto.recup_estado) {
-      // Cargar relaciones para el webhook
+      // Cargar relaciones actualizadas para el webhook
       const prestamoConRelaciones = await this.findOne(updated.prestamoId);
 
-      // Emitir evento a RabbitMQ para auditoría (recup_prestamo.estado-cambiado)
+      // Emitir evento a RabbitMQ (recup_prestamo.estado-cambiado)
       this.auditClient.emit('recup_prestamo.estado-cambiado', {
         prestamoId: updated.prestamoId,
         estadoAnterior: estadoAnterior,
@@ -136,25 +128,8 @@ export class PrestamosService {
         comentario: `Estado cambiado de ${estadoAnterior} a ${updatePrestamoDto.recup_estado}`,
       });
 
-      // Enviar notificación a n8n webhook (recup_prestamo.notificacion)
-      await this.sendN8nWebhook({
-        prestamoId: updated.prestamoId,
-        recup_codigo: updated.recup_codigo,
-        estadoAnterior: estadoAnterior,
-        estadoNuevo: updatePrestamoDto.recup_estado,
-        lector: {
-          recup_nombreCompleto: prestamoConRelaciones.lector?.recup_nombreCompleto || '',
-          recup_email: prestamoConRelaciones.lector?.recup_email || '',
-          recup_telefono: prestamoConRelaciones.lector?.recup_telefono || '',
-        },
-        libro: {
-          recup_titulo: prestamoConRelaciones.libro?.recup_titulo || '',
-          recup_autor: prestamoConRelaciones.libro?.recup_autor || '',
-        },
-        recup_fechaPrestamo: updated.recup_fechaPrestamo,
-        recup_fechaDevolucion: updated.recup_fechaDevolucion,
-        fechaCambio: new Date(),
-      });
+      // Enviar webhook a n8n (recup_prestamo.notificacion)
+      await this.sendWebhookToN8n(prestamoConRelaciones, estadoAnterior, updatePrestamoDto.recup_estado);
     }
 
     return updated;

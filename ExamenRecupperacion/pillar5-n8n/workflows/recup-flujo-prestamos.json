@@ -5,84 +5,184 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "recup_prestamo.notificacion",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "webhook-trigger",
-      "name": "Webhook recup_prestamo.notificacion",
+      "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [250, 300],
-      "webhookId": "recup_prestamo_notificacion"
+      "webhookId": "recup-prestamo-webhook"
     },
     {
       "parameters": {
-        "jsCode": "// Procesar datos del préstamo\nconst payload = $input.first().json;\n\n// Formatear mensaje para Telegram\nconst estadoEmoji = {\n  'SOLICITADO': '📝',\n  'APROBADO': '✅',\n  'ENTREGADO': '📚',\n  'DEVUELTO': '🔄',\n  'VENCIDO': '⚠️'\n};\n\nconst emoji = estadoEmoji[payload.estadoNuevo] || '📋';\n\nconst mensaje = `${emoji} *NOTIFICACIÓN DE PRÉSTAMO*\n\n` +\n  `📖 *Libro:* ${payload.libro.recup_titulo}\\n` +\n  `✍️ *Autor:* ${payload.libro.recup_autor}\\n\\n` +\n  `👤 *Lector:* ${payload.lector.recup_nombreCompleto}\\n` +\n  `📧 *Email:* ${payload.lector.recup_email}\\n` +\n  `📱 *Teléfono:* ${payload.lector.recup_telefono}\\n\\n` +\n  `🔢 *Código:* ${payload.recup_codigo}\\n` +\n  `📅 *Fecha Préstamo:* ${new Date(payload.recup_fechaPrestamo).toLocaleDateString()}\\n` +\n  `📅 *Fecha Devolución:* ${new Date(payload.recup_fechaDevolucion).toLocaleDateString()}\\n\\n` +\n  `🔄 *Estado Anterior:* ${payload.estadoAnterior || 'N/A'}\\n` +\n  `➡️ *Estado Nuevo:* ${payload.estadoNuevo}\\n\\n` +\n  `🕐 *Fecha del Cambio:* ${new Date(payload.fechaCambio).toLocaleString()}`;\n\nreturn {\n  json: {\n    mensaje,\n    prestamoId: payload.prestamoId,\n    estadoNuevo: payload.estadoNuevo,\n    lectorEmail: payload.lector.recup_email\n  }\n};"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-evento",
+              "leftValue": "={{ $json.evento }}",
+              "rightValue": "recup_prestamo.estado-cambiado",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "condition-prestamo-id",
+              "leftValue": "={{ $json.prestamoId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "format-message",
-      "name": "Formatear Mensaje",
-      "type": "n8n-nodes-base.code",
+      "id": "if-validate-event",
+      "name": "IF Validate Event",
+      "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [500, 300]
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Genera un mensaje de notificación amigable en español para informar sobre un cambio de estado de préstamo de biblioteca. Datos del préstamo:\\n- Código: {{ $json.recup_codigo }}\\n- Lector: {{ $json.lector.recup_nombreCompleto }}\\n- Libro: {{ $json.libro.recup_titulo }} de {{ $json.libro.recup_autor }}\\n- Estado anterior: {{ $json.estadoAnterior }}\\n- Estado nuevo: {{ $json.estadoNuevo }}\\n- Fecha del cambio: {{ $json.fechaCambio }}\\n\\nEl mensaje debe ser breve, profesional y amigable. Incluye emojis apropiados.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 256\n  }\n}",
+        "options": {}
+      },
+      "id": "http-request-gemini",
+      "name": "HTTP Request Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 200]
     },
     {
       "parameters": {
         "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
-        "text": "={{ $json.mensaje }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
       },
       "id": "telegram-send",
-      "name": "Enviar Telegram",
+      "name": "Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [750, 300],
+      "position": [910, 200],
       "credentials": {
         "telegramApi": {
-          "id": "telegram-bot-credential",
-          "name": "Telegram Bot API"
+          "id": "telegram-credentials",
+          "name": "Telegram API"
         }
       }
     },
     {
       "parameters": {
-        "options": {}
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": \"Notificación enviada correctamente\"\n}",
+        "options": {
+          "responseCode": 200
+        }
       },
-      "id": "respond-webhook",
-      "name": "Responder Webhook",
+      "id": "respond-success",
+      "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1000, 300]
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"message\": \"Evento no válido o datos incompletos\",\n  \"receivedEvent\": \"{{ $json.evento }}\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-invalid",
+      "name": "Respond Invalid Event",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [690, 420]
     }
   ],
   "connections": {
-    "Webhook recup_prestamo.notificacion": {
+    "Webhook Trigger": {
       "main": [
         [
           {
-            "node": "Formatear Mensaje",
+            "node": "IF Validate Event",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Formatear Mensaje": {
+    "IF Validate Event": {
       "main": [
         [
           {
-            "node": "Enviar Telegram",
+            "node": "HTTP Request Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Invalid Event",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Enviar Telegram": {
+    "HTTP Request Gemini": {
       "main": [
         [
           {
-            "node": "Responder Webhook",
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
             "type": "main",
             "index": 0
           }
@@ -94,14 +194,14 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "recup-flujo-prestamos-v1",
+  "versionId": "1",
   "meta": {
-    "templateCredsSetupCompleted": false,
+    "templateCredsSetupCompleted": true,
     "instanceId": "recup-biblioteca-system"
   },
   "tags": [
     {
-      "name": "recup-prestamos",
+      "name": "recup-biblioteca",
       "createdAt": "2026-02-02T00:00:00.000Z",
       "updatedAt": "2026-02-02T00:00:00.000Z"
     }
