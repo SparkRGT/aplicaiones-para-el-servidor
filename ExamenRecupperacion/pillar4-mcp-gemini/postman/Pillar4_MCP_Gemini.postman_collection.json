@@ -1,0 +1,428 @@
+{
+  "info": {
+    "_postman_id": "pillar4-mcp-gemini-collection",
+    "name": "Pillar 4 - MCP Server + Gemini",
+    "description": "Colección de pruebas para el Pilar 4: MCP Server con integración Gemini Function Calling",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3003",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Info",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verificar el estado del servicio"
+          },
+          "response": []
+        },
+        {
+          "name": "List Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tools",
+              "host": ["{{baseUrl}}"],
+              "path": ["tools"]
+            },
+            "description": "Listar herramientas MCP disponibles"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MCP JSON-RPC 2.0",
+      "item": [
+        {
+          "name": "MCP - List Tools",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Listar herramientas disponibles via JSON-RPC 2.0"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos (VENCIDO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"VENCIDO\"\n    }\n  },\n  \"id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos VENCIDOS via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos (ENTREGADO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"ENTREGADO\"\n    }\n  },\n  \"id\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos ENTREGADOS via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos (SOLICITADO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"SOLICITADO\"\n    }\n  },\n  \"id\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos SOLICITADOS via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos (APROBADO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"APROBADO\"\n    }\n  },\n  \"id\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos APROBADOS via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos (DEVUELTO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"DEVUELTO\"\n    }\n  },\n  \"id\": 6\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos DEVUELTOS via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Call recup_consultar_prestamos con lectorId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"estado\": \"ENTREGADO\",\n      \"lectorId\": 1\n    }\n  },\n  \"id\": 7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Consultar préstamos de un lector específico via MCP"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Error: Tool not found",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"tool_inexistente\",\n    \"arguments\": {}\n  },\n  \"id\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Probar error cuando el tool no existe"
+          },
+          "response": []
+        },
+        {
+          "name": "MCP - Error: Missing required param",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"recup_consultar_prestamos\",\n    \"arguments\": {\n      \"lectorId\": 1\n    }\n  },\n  \"id\": 9\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mcp",
+              "host": ["{{baseUrl}}"],
+              "path": ["mcp"]
+            },
+            "description": "Probar error cuando falta el parámetro requerido 'estado'"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gemini Chat",
+      "item": [
+        {
+          "name": "Chat - Préstamos vencidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"¿Cuáles son los préstamos vencidos?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Consulta en lenguaje natural sobre préstamos vencidos"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Préstamos entregados",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Muéstrame los libros que están prestados actualmente\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Consulta en lenguaje natural sobre libros prestados"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Préstamos de un lector",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"¿Qué préstamos tiene el lector con ID 1?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Consulta en lenguaje natural sobre préstamos de un lector específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Solicitudes pendientes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"¿Hay solicitudes de préstamo pendientes de aprobar?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Consulta en lenguaje natural sobre solicitudes pendientes"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Libros devueltos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Lista los préstamos que ya fueron devueltos\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Consulta en lenguaje natural sobre devoluciones"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Pregunta general",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hola, ¿qué puedes hacer?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Pregunta general que no requiere llamar al tool"
+          },
+          "response": []
+        },
+        {
+          "name": "Chat - Error: Sin mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otro_campo\": \"valor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["chat"]
+            },
+            "description": "Probar error cuando no se envía el campo message"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "name": "recup-flujo-prestamos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recup_prestamo.notificacion",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook recup_prestamo.notificacion",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "recup_prestamo_notificacion"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar datos del préstamo\nconst payload = $input.first().json;\n\n// Formatear mensaje para Telegram\nconst estadoEmoji = {\n  'SOLICITADO': '📝',\n  'APROBADO': '✅',\n  'ENTREGADO': '📚',\n  'DEVUELTO': '🔄',\n  'VENCIDO': '⚠️'\n};\n\nconst emoji = estadoEmoji[payload.estadoNuevo] || '📋';\n\nconst mensaje = `${emoji} *NOTIFICACIÓN DE PRÉSTAMO*\n\n` +\n  `📖 *Libro:* ${payload.libro.recup_titulo}\\n` +\n  `✍️ *Autor:* ${payload.libro.recup_autor}\\n\\n` +\n  `👤 *Lector:* ${payload.lector.recup_nombreCompleto}\\n` +\n  `📧 *Email:* ${payload.lector.recup_email}\\n` +\n  `📱 *Teléfono:* ${payload.lector.recup_telefono}\\n\\n` +\n  `🔢 *Código:* ${payload.recup_codigo}\\n` +\n  `📅 *Fecha Préstamo:* ${new Date(payload.recup_fechaPrestamo).toLocaleDateString()}\\n` +\n  `📅 *Fecha Devolución:* ${new Date(payload.recup_fechaDevolucion).toLocaleDateString()}\\n\\n` +\n  `🔄 *Estado Anterior:* ${payload.estadoAnterior || 'N/A'}\\n` +\n  `➡️ *Estado Nuevo:* ${payload.estadoNuevo}\\n\\n` +\n  `🕐 *Fecha del Cambio:* ${new Date(payload.fechaCambio).toLocaleString()}`;\n\nreturn {\n  json: {\n    mensaje,\n    prestamoId: payload.prestamoId,\n    estadoNuevo: payload.estadoNuevo,\n    lectorEmail: payload.lector.recup_email\n  }\n};"
+      },
+      "id": "format-message",
+      "name": "Formatear Mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-send",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [750, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-credential",
+          "name": "Telegram Bot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1000, 300]
+    }
+  ],
+  "connections": {
+    "Webhook recup_prestamo.notificacion": {
+      "main": [
+        [
+          {
+            "node": "Formatear Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Telegram": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "recup-flujo-prestamos-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "recup-biblioteca-system"
+  },
+  "tags": [
+    {
+      "name": "recup-prestamos",
+      "createdAt": "2026-02-02T00:00:00.000Z",
+      "updatedAt": "2026-02-02T00:00:00.000Z"
+    }
+  ]
+}
