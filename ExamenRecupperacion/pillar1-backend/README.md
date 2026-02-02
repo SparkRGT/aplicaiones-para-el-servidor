@@ -1,98 +1,250 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# PILLAR 1: Backend + Persistence
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 📚 DOMINIO: SISTEMA DE PRÉSTAMOS DE BIBLIOTECA
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este pilar implementa el backend principal con persistencia para el Sistema de Préstamos de Biblioteca.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠️ Stack Tecnológico
 
-## Project setup
+| Componente | Tecnología | Versión |
+|------------|------------|---------|
+| **Framework** | NestJS | ^11.0.1 |
+| **ORM** | TypeORM | ^0.3.28 |
+| **Base de Datos** | SQLite | ^5.1.7 |
+| **Lenguaje** | TypeScript | ^5.7.3 |
+| **Runtime** | Node.js | v22.x |
 
-```bash
-$ npm install
+---
+
+## 📁 Estructura del Proyecto
+
+```
+pillar1-backend/
+├── src/
+│   ├── lectores/                    # Módulo Recup_Lector
+│   │   ├── dto/
+│   │   │   ├── create-lector.dto.ts
+│   │   │   └── update-lector.dto.ts
+│   │   ├── entities/
+│   │   │   └── recup_lector.entity.ts
+│   │   ├── lectores.controller.ts
+│   │   ├── lectores.module.ts
+│   │   └── lectores.service.ts
+│   │
+│   ├── libros/                      # Módulo Recup_Libro
+│   │   ├── dto/
+│   │   │   ├── create-libro.dto.ts
+│   │   │   └── update-libro.dto.ts
+│   │   ├── entities/
+│   │   │   └── recup_libro.entity.ts
+│   │   ├── libros.controller.ts
+│   │   ├── libros.module.ts
+│   │   └── libros.service.ts
+│   │
+│   ├── prestamos/                   # Módulo Recup_Prestamo
+│   │   ├── dto/
+│   │   │   ├── create-prestamo.dto.ts
+│   │   │   └── update-prestamo.dto.ts
+│   │   ├── entities/
+│   │   │   ├── index.ts
+│   │   │   ├── recup_lector.entity.ts
+│   │   │   ├── recup_libro.entity.ts
+│   │   │   └── recup_prestamo.entity.ts
+│   │   ├── prestamos.controller.ts
+│   │   ├── prestamos.module.ts
+│   │   └── prestamos.service.ts
+│   │
+│   ├── app.module.ts               # Módulo principal
+│   ├── app.controller.ts
+│   ├── app.service.ts
+│   └── main.ts                     # Bootstrap
+│
+├── postman/                         # Colecciones de prueba
+│   ├── Pillar1_Evidencia.postman_collection.json
+│   └── Recup_Prestamos_API.postman_collection.json
+│
+├── biblioteca.db                    # Base de datos SQLite
+├── package.json
+├── tsconfig.json
+└── nest-cli.json
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 🗃️ Modelo de Datos
 
-# watch mode
-$ npm run start:dev
+### Entidades Maestras
 
-# production mode
-$ npm run start:prod
+#### 1. Recup_Lector (Entidad Maestra)
+
+| Atributo | Tipo | Descripción |
+|----------|------|-------------|
+| `lectorId` | number | PK, autoincrement |
+| `recup_carnet` | string | Número de carnet único |
+| `recup_nombreCompleto` | string | Nombre completo |
+| `recup_tipoLector` | string | Tipo (ESTUDIANTE, DOCENTE, EXTERNO) |
+| `recup_telefono` | string | Teléfono de contacto |
+| `recup_email` | string | Correo electrónico |
+
+#### 2. Recup_Libro (Entidad Maestra)
+
+| Atributo | Tipo | Descripción |
+|----------|------|-------------|
+| `libroId` | number | PK, autoincrement |
+| `recup_isbn` | string | ISBN único del libro |
+| `recup_titulo` | string | Título del libro |
+| `recup_autor` | string | Autor del libro |
+| `recup_categoria` | string | Categoría temática |
+| `recup_disponible` | boolean | Estado de disponibilidad |
+
+### Entidad Transaccional
+
+#### 3. Recup_Prestamo (Entidad Transaccional - Principal)
+
+| Atributo | Tipo | Descripción |
+|----------|------|-------------|
+| `prestamoId` | number | PK, autoincrement |
+| `recup_codigo` | string | Código único de préstamo (ej: PRE-001) |
+| `recup_fechaPrestamo` | Date | Fecha del préstamo |
+| `recup_fechaDevolucion` | Date | Fecha esperada de devolución |
+| `recup_estado` | string | SOLICITADO \| APROBADO \| ENTREGADO \| DEVUELTO \| VENCIDO |
+| `recup_fechaRealDevolucion` | Date | Fecha real de devolución (nullable) |
+| `recup_lectorId` | number | FK → Recup_Lector |
+| `recup_libroId` | number | FK → Recup_Libro |
+
+---
+
+## 🔗 Relaciones
+
+```
+┌─────────────────┐       ┌──────────────────┐       ┌─────────────────┐
+│  Recup_Lector   │       │  Recup_Prestamo  │       │   Recup_Libro   │
+│    (Master)     │◄──────│ (Transactional)  │──────►│    (Master)     │
+│                 │  1:N  │                  │  N:1  │                 │
+│  lectorId (PK)  │       │  recup_lectorId  │       │  libroId (PK)   │
+│                 │       │  recup_libroId   │       │                 │
+└─────────────────┘       └──────────────────┘       └─────────────────┘
 ```
 
-## Run tests
+---
 
+## 🌐 API REST Endpoints
+
+### Recup_Lector
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/recup-lectores` | Obtener todos los lectores |
+| GET | `/recup-lectores/:id` | Obtener lector por ID |
+| POST | `/recup-lectores` | Crear nuevo lector |
+| PATCH | `/recup-lectores/:id` | Actualizar lector |
+| DELETE | `/recup-lectores/:id` | Eliminar lector |
+
+### Recup_Libro
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/recup-libros` | Obtener todos los libros |
+| GET | `/recup-libros/:id` | Obtener libro por ID |
+| POST | `/recup-libros` | Crear nuevo libro |
+| PATCH | `/recup-libros/:id` | Actualizar libro |
+| DELETE | `/recup-libros/:id` | Eliminar libro |
+
+### Recup_Prestamo (Endpoint Principal)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| **GET** | **`/recup-prestamos`** | **Endpoint REST requerido por el dominio** |
+| GET | `/recup-prestamos/:id` | Obtener préstamo por ID |
+| POST | `/recup-prestamos` | Crear nuevo préstamo |
+| PATCH | `/recup-prestamos/:id` | Actualizar préstamo |
+| DELETE | `/recup-prestamos/:id` | Eliminar préstamo |
+
+---
+
+## 🚀 Comandos
+
+### Instalación
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd pillar1-backend
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### Desarrollo
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Iniciar en modo desarrollo (hot reload)
+npm run start:dev
+
+# Iniciar en modo producción
+npm run start:prod
+
+# Compilar
+npm run build
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Troubleshooting - Puerto en uso
+Si el puerto 3000 está en uso:
+```powershell
+# Ver procesos usando el puerto 3000
+netstat -ano | findstr :3000
 
-## Resources
+# Matar el proceso (reemplazar PID con el número del proceso)
+taskkill /PID <PID> /F
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📋 Nomenclatura del Dominio
 
-## Support
+| Componente | Nombre Exacto |
+|------------|---------------|
+| Evento RabbitMQ | `recup_prestamo.estado.cambiado` |
+| Evento Webhook | `recup_prestamo.notificacion` |
+| Tool MCP | `recup_consultar_prestamos` |
+| Workflow n8n | `recup-flujo-prestamos` |
+| **Endpoint REST** | **`GET /recup-prestamos`** |
+| Query GraphQL | Préstamos vencidos con información del lector y libro prestado |
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## ⚠️ Restricciones del Pilar 1
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Elemento | Estado |
+|----------|--------|
+| Recup_Lector | ✅ Implementado |
+| Recup_Libro | ✅ Implementado |
+| Recup_Prestamo | ✅ Implementado |
+| Recup_HistorialPrestamo | ❌ **NO IMPLEMENTAR** (Pilar 3 - Auditoría) |
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🧪 Pruebas con Postman
+
+1. Importar la colección desde: `postman/Pillar1_Evidencia.postman_collection.json`
+2. Verificar que la variable `{{baseUrl}}` esté configurada como `http://localhost:3000`
+3. Ejecutar las pruebas en orden:
+   - **1. SETUP DATOS MAESTROS** - Crear lectores y libros
+   - **2. CRUD RECUP_PRESTAMO** - Operaciones CRUD completas
+   - **3. VERIFICAR ENTIDADES MAESTRAS** - Validar relaciones
+   - **4. EVIDENCIA FINAL** - Capturas para documentación
+
+---
+
+## 📝 Configuración TypeORM
+
+```typescript
+// app.module.ts
+TypeOrmModule.forRoot({
+  type: 'sqlite',
+  database: 'biblioteca.db',
+  entities: [Recup_Lector, Recup_Libro, Recup_Prestamo],
+  synchronize: true,  // Solo desarrollo
+})
+```
+
+---
+
+## 👨‍💻 Autor
+
+**Examen de Recuperación - Aplicaciones para el Servidor**
+
+Fecha: Febrero 2026
