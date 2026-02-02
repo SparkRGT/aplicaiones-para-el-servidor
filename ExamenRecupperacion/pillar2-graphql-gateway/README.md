@@ -1,98 +1,270 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Pillar 2 - GraphQL Gateway
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Descripción
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Gateway GraphQL que actúa como capa de reporting sobre el sistema de préstamos de biblioteca. Este pilar **NO accede directamente a la base de datos**, sino que consume los endpoints REST expuestos por el Pillar 1.
 
-## Description
+## Arquitectura
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENTE                                  │
+│                    (Apollo Sandbox)                             │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │ GraphQL Queries
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 PILLAR 2 - GraphQL Gateway                      │
+│                    Puerto: 4001                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              RecupPrestamosResolver                       │  │
+│  │  - recupPrestamos                                         │  │
+│  │  - recupPrestamosPorEstado(estado)                        │  │
+│  │  - recupReporteVencidos                                   │  │
+│  │  - recupPrestamosConDetalles                              │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                          │                                      │
+│  ┌───────────────────────▼───────────────────────────────────┐  │
+│  │              RecupPrestamosService                        │  │
+│  │                  (HttpModule/Axios)                       │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │ HTTP/REST
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 PILLAR 1 - Backend REST                         │
+│                    Puerto: 3000                                 │
+│                                                                 │
+│  Endpoint consumido: GET /recup-prestamos                       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Compile and run the project
+## Configuración
+
+### Variables de Entorno
+
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `PORT` | Puerto del servidor GraphQL | `4001` |
+| `PILLAR1_URL` | URL base del Pillar 1 REST | `http://localhost:3000` |
+
+### Instalación
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd pillar2-graphql-gateway
+npm install
 ```
 
-## Run tests
+### Ejecución
 
 ```bash
-# unit tests
-$ npm run test
+# Desarrollo (con hot-reload)
+npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Producción
+npm run start:prod
 ```
 
-## Deployment
+## Endpoints REST Consumidos (Pillar 1)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### Base URL
+```
+http://localhost:3000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Endpoints
 
-## Resources
+| Método | Endpoint | Descripción | Usado por |
+|--------|----------|-------------|-----------|
+| `GET` | `/recup-prestamos` | Obtiene todos los préstamos | `findAll()`, `findByEstado()`, `getReporteVencidos()` |
+| `GET` | `/recup-prestamos?includeRelations=true` | Préstamos con lector y libro | `getPrestamosConDetalles()` |
 
-Check out a few resources that may come in handy when working with NestJS:
+## GraphQL Schema
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### ObjectTypes
 
-## Support
+#### RecupLector
+```graphql
+type RecupLector {
+  lectorId: Int!           # PK, autoincrement
+  recup_carnet: String!    # Número de carnet único
+  recup_nombreCompleto: String!
+  recup_tipoLector: String!  # ESTUDIANTE | DOCENTE | EXTERNO
+  recup_telefono: String!
+  recup_email: String!
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### RecupLibro
+```graphql
+type RecupLibro {
+  libroId: Int!            # PK, autoincrement
+  recup_isbn: String!      # ISBN único del libro
+  recup_titulo: String!
+  recup_autor: String!
+  recup_categoria: String!
+  recup_disponible: Boolean!
+}
+```
 
-## Stay in touch
+#### RecupPrestamo
+```graphql
+type RecupPrestamo {
+  prestamoId: Int!         # PK, autoincrement
+  recup_codigo: String!    # Código único (ej: PRE-001)
+  recup_fechaPrestamo: String!
+  recup_fechaDevolucion: String!
+  recup_estado: String!    # SOLICITADO | APROBADO | ENTREGADO | DEVUELTO | VENCIDO
+  recup_fechaRealDevolucion: String
+  recup_lectorId: Int!     # FK -> Recup_Lector
+  recup_libroId: Int!      # FK -> Recup_Libro
+  lector: RecupLector
+  libro: RecupLibro
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### RecupPrestamosVencidosReport
+```graphql
+type RecupPrestamosVencidosReport {
+  totalVencidos: Int!
+  fechaReporte: String!
+  prestamosVencidos: [RecupPrestamo!]!
+}
+```
 
-## License
+## Queries Disponibles
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 1. Obtener todos los préstamos
+```graphql
+query {
+  recupPrestamos {
+    prestamoId
+    recup_codigo
+    recup_estado
+    recup_fechaPrestamo
+    recup_fechaDevolucion
+  }
+}
+```
+
+### 2. Filtrar préstamos por estado
+```graphql
+query {
+  recupPrestamosPorEstado(estado: "ENTREGADO") {
+    prestamoId
+    recup_codigo
+    recup_estado
+    recup_fechaPrestamo
+    recup_fechaDevolucion
+  }
+}
+```
+
+**Estados válidos:**
+- `SOLICITADO`
+- `APROBADO`
+- `ENTREGADO`
+- `DEVUELTO`
+- `VENCIDO`
+
+### 3. Reporte de préstamos vencidos
+```graphql
+query {
+  recupReporteVencidos {
+    totalVencidos
+    fechaReporte
+    prestamosVencidos {
+      prestamoId
+      recup_codigo
+      recup_estado
+      recup_fechaDevolucion
+    }
+  }
+}
+```
+
+### 4. Préstamos con detalles (lector y libro)
+```graphql
+query {
+  recupPrestamosConDetalles {
+    prestamoId
+    recup_codigo
+    recup_estado
+    lector {
+      recup_nombreCompleto
+      recup_carnet
+      recup_tipoLector
+    }
+    libro {
+      recup_titulo
+      recup_autor
+      recup_isbn
+    }
+  }
+}
+```
+
+## Acceso al Playground
+
+Una vez iniciado el servidor, acceder a:
+
+```
+http://localhost:4001/graphql
+```
+
+Se abrirá **Apollo Sandbox** donde se pueden ejecutar las queries interactivamente.
+
+## Estructura del Proyecto
+
+```
+pillar2-graphql-gateway/
+├── src/
+│   ├── app.module.ts                    # Configuración GraphQL + Apollo
+│   ├── app.controller.ts
+│   ├── app.service.ts
+│   ├── main.ts                          # Entry point (puerto 4001)
+│   └── recup-prestamos/
+│       ├── index.ts
+│       ├── recup-prestamos.module.ts    # Módulo con HttpModule
+│       ├── recup-prestamos.resolver.ts  # Resolver GraphQL
+│       ├── recup-prestamos.service.ts   # Servicio (consume REST)
+│       └── object-types/
+│           ├── index.ts
+│           ├── recup-lector.type.ts
+│           ├── recup-libro.type.ts
+│           ├── recup-prestamo.type.ts
+│           └── recup-prestamos-vencidos-report.type.ts
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Dependencias Principales
+
+| Paquete | Versión | Propósito |
+|---------|---------|-----------|
+| `@nestjs/graphql` | ^13.x | Integración GraphQL con NestJS |
+| `@nestjs/apollo` | ^13.x | Driver Apollo para NestJS |
+| `@apollo/server` | ^5.x | Servidor Apollo GraphQL |
+| `@nestjs/axios` | ^4.x | Cliente HTTP para consumir REST |
+| `graphql` | ^16.x | Librería core de GraphQL |
+
+## Nomenclatura del Dominio
+
+| Componente | Nombre Exacto |
+|------------|---------------|
+| Evento RabbitMQ | `recup_prestamo.estado.cambiado` |
+| Evento Webhook | `recup_prestamo.notificacion` |
+| Tool MCP | `recup_consultar_prestamos` |
+| Workflow n8n | `recup-flujo-prestamos` |
+| Endpoint REST | `GET /recup-prestamos` |
+
+## Requisitos
+
+- Node.js >= 18
+- Pillar 1 corriendo en puerto 3000
+- npm o yarn
+
+## Autor
+
+Sistema de Préstamos de Biblioteca - Examen Recuperación

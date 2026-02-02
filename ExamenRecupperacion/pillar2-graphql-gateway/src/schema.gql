@@ -1,0 +1,109 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Query {
+  """Obtiene todos los préstamos desde Pillar 1"""
+  recupPrestamos: [RecupPrestamo!]!
+
+  """Préstamos con información del lector y libro prestado"""
+  recupPrestamosConDetalles: [RecupPrestamo!]!
+
+  """
+  Filtra préstamos por estado (SOLICITADO | APROBADO | ENTREGADO | DEVUELTO | VENCIDO)
+  """
+  recupPrestamosPorEstado(
+    """Estado del préstamo a filtrar"""
+    estado: String!
+  ): [RecupPrestamo!]!
+
+  """Reporte agregado de préstamos vencidos"""
+  recupReporteVencidos: RecupPrestamosVencidosReport!
+}
+
+"""Entidad Maestra - Lector"""
+type RecupLector {
+  """PK, autoincrement"""
+  lectorId: Int!
+
+  """Número de carnet único"""
+  recup_carnet: String!
+
+  """Correo electrónico"""
+  recup_email: String!
+
+  """Nombre completo"""
+  recup_nombreCompleto: String!
+
+  """Teléfono de contacto"""
+  recup_telefono: String!
+
+  """Tipo (ESTUDIANTE, DOCENTE, EXTERNO)"""
+  recup_tipoLector: String!
+}
+
+"""Entidad Maestra - Libro"""
+type RecupLibro {
+  """PK, autoincrement"""
+  libroId: Int!
+
+  """Autor del libro"""
+  recup_autor: String!
+
+  """Categoría temática"""
+  recup_categoria: String!
+
+  """Estado de disponibilidad"""
+  recup_disponible: Boolean!
+
+  """ISBN único del libro"""
+  recup_isbn: String!
+
+  """Título del libro"""
+  recup_titulo: String!
+}
+
+"""Entidad Transaccional Principal - Préstamo"""
+type RecupPrestamo {
+  """Información del lector"""
+  lector: RecupLector
+
+  """Información del libro"""
+  libro: RecupLibro
+
+  """PK, autoincrement"""
+  prestamoId: Int!
+
+  """Código único de préstamo (ej: PRE-001)"""
+  recup_codigo: String!
+
+  """SOLICITADO | APROBADO | ENTREGADO | DEVUELTO | VENCIDO"""
+  recup_estado: String!
+
+  """Fecha esperada de devolución"""
+  recup_fechaDevolucion: String!
+
+  """Fecha del préstamo"""
+  recup_fechaPrestamo: String!
+
+  """Fecha real de devolución (nullable)"""
+  recup_fechaRealDevolucion: String
+
+  """FK -> Recup_Lector"""
+  recup_lectorId: Int!
+
+  """FK -> Recup_Libro"""
+  recup_libroId: Int!
+}
+
+"""Reporte de préstamos vencidos"""
+type RecupPrestamosVencidosReport {
+  """Fecha de generación del reporte"""
+  fechaReporte: String!
+
+  """Lista de préstamos vencidos"""
+  prestamosVencidos: [RecupPrestamo!]!
+
+  """Total de préstamos vencidos"""
+  totalVencidos: Int!
+}
