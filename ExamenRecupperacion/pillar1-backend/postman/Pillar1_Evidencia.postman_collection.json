@@ -1,0 +1,366 @@
+{
+  "info": {
+    "name": "PILLAR 1 - EVIDENCIA REQUERIDA",
+    "_postman_id": "pillar1-evidencia-collection",
+    "description": "Colección de evidencias para Pillar 1: Backend + Persistence\n\nDOMINIO: SISTEMA DE PRÉSTAMOS DE BIBLIOTECA\n\nEntidades:\n- Recup_Lector (Entidad Maestra)\n- Recup_Libro (Entidad Maestra)\n- Recup_Prestamo (Entidad Transaccional)\n\nEndpoint REST: GET /recup-prestamos\nQuery sugerida: Préstamos vencidos con información del lector y libro prestado",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. SETUP DATOS MAESTROS",
+      "description": "Crear datos iniciales para las pruebas",
+      "item": [
+        {
+          "name": "1.1 Crear Lector ESTUDIANTE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_carnet\": \"EST-2026-001\",\n  \"recup_nombreCompleto\": \"Juan Carlos Pérez López\",\n  \"recup_tipoLector\": \"ESTUDIANTE\",\n  \"recup_telefono\": \"555-1234\",\n  \"recup_email\": \"juan.perez@universidad.edu\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-lectores",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-lectores"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Crear Lector DOCENTE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_carnet\": \"DOC-2026-001\",\n  \"recup_nombreCompleto\": \"María Elena García Sánchez\",\n  \"recup_tipoLector\": \"DOCENTE\",\n  \"recup_telefono\": \"555-5678\",\n  \"recup_email\": \"maria.garcia@universidad.edu\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-lectores",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-lectores"]
+            }
+          }
+        },
+        {
+          "name": "1.3 Crear Libro 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_isbn\": \"978-84-376-0494-7\",\n  \"recup_titulo\": \"Cien años de soledad\",\n  \"recup_autor\": \"Gabriel García Márquez\",\n  \"recup_categoria\": \"Literatura\",\n  \"recup_disponible\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-libros",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-libros"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Crear Libro 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_isbn\": \"978-0-13-468599-1\",\n  \"recup_titulo\": \"The Pragmatic Programmer\",\n  \"recup_autor\": \"David Thomas, Andrew Hunt\",\n  \"recup_categoria\": \"Tecnología\",\n  \"recup_disponible\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-libros",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-libros"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. CRUD RECUP_PRESTAMO",
+      "description": "Operaciones CRUD completas para Recup_Prestamo",
+      "item": [
+        {
+          "name": "2.1 CREATE - Préstamo SOLICITADO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_codigo\": \"PRE-001\",\n  \"recup_fechaPrestamo\": \"2026-02-02\",\n  \"recup_fechaDevolucion\": \"2026-02-16\",\n  \"recup_estado\": \"SOLICITADO\",\n  \"recup_lectorId\": 1,\n  \"recup_libroId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "Estados válidos: SOLICITADO | APROBADO | ENTREGADO | DEVUELTO | VENCIDO"
+          }
+        },
+        {
+          "name": "2.2 CREATE - Préstamo VENCIDO",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_codigo\": \"PRE-002\",\n  \"recup_fechaPrestamo\": \"2026-01-15\",\n  \"recup_fechaDevolucion\": \"2026-01-30\",\n  \"recup_estado\": \"VENCIDO\",\n  \"recup_lectorId\": 2,\n  \"recup_libroId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "Préstamo vencido para demostrar la query sugerida"
+          }
+        },
+        {
+          "name": "2.3 READ - GET /recup-prestamos (ENDPOINT PRINCIPAL)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "ENDPOINT REST REQUERIDO según dominio.\n\nRetorna: Préstamos con información del lector y libro prestado"
+          }
+        },
+        {
+          "name": "2.4 READ - Obtener Préstamo por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.5 UPDATE - Cambiar Estado a APROBADO",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_estado\": \"APROBADO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.6 UPDATE - Cambiar Estado a ENTREGADO",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_estado\": \"ENTREGADO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.7 UPDATE - Cambiar Estado a DEVUELTO",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_estado\": \"DEVUELTO\",\n  \"recup_fechaRealDevolucion\": \"2026-02-10\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos", "1"]
+            },
+            "description": "recup_fechaRealDevolucion es nullable, se registra al devolver"
+          }
+        },
+        {
+          "name": "2.8 DELETE - Eliminar Préstamo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. VERIFICAR ENTIDADES MAESTRAS",
+      "description": "Verificar que las entidades maestras funcionan correctamente",
+      "item": [
+        {
+          "name": "3.1 GET Todos los Lectores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-lectores",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-lectores"]
+            }
+          }
+        },
+        {
+          "name": "3.2 GET Lector por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-lectores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-lectores", "1"]
+            }
+          }
+        },
+        {
+          "name": "3.3 GET Todos los Libros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-libros",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-libros"]
+            }
+          }
+        },
+        {
+          "name": "3.4 GET Libro por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-libros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-libros", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. EVIDENCIA FINAL",
+      "description": "Pruebas finales para captura de evidencia",
+      "item": [
+        {
+          "name": "4.1 GET /recup-prestamos - CON RELACIONES",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "EVIDENCIA PRINCIPAL\n\nEndpoint REST: GET /recup-prestamos\n\nDebe retornar préstamos con información completa:\n- Datos del préstamo\n- Datos del lector (FK: recup_lectorId → Recup_Lector)\n- Datos del libro (FK: recup_libroId → Recup_Libro)"
+          }
+        },
+        {
+          "name": "4.2 Crear Préstamo Completo para Evidencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recup_codigo\": \"PRE-EVIDENCIA\",\n  \"recup_fechaPrestamo\": \"2026-02-02\",\n  \"recup_fechaDevolucion\": \"2026-02-16\",\n  \"recup_estado\": \"SOLICITADO\",\n  \"recup_lectorId\": 1,\n  \"recup_libroId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "Crear préstamo para captura de evidencia"
+          }
+        },
+        {
+          "name": "4.3 Verificar Préstamo Creado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recup-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["recup-prestamos"]
+            },
+            "description": "Verificar que el préstamo fue creado con las relaciones correctas"
+          }
+        }
+      ]
+    }
+  ]
+}
