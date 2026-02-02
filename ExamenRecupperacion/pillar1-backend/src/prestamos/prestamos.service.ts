@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ClientProxy } from '@nestjs/microservices';
 import { Recup_Prestamo } from './entities/recup_prestamo.entity';
 import { CreateRecupPrestamoDto } from './dto/create-recup-prestamo.dto';
 import { UpdateRecupPrestamoDto } from './dto/update-recup-prestamo.dto';
@@ -10,11 +11,24 @@ export class PrestamosService {
   constructor(
     @InjectRepository(Recup_Prestamo)
     private readonly prestamoRepository: Repository<Recup_Prestamo>,
+    @Inject('AUDIT_SERVICE')
+    private readonly auditClient: ClientProxy,
   ) {}
 
   async create(createPrestamoDto: CreateRecupPrestamoDto): Promise<Recup_Prestamo> {
     const prestamo = this.prestamoRepository.create(createPrestamoDto);
-    return await this.prestamoRepository.save(prestamo);
+    const saved = await this.prestamoRepository.save(prestamo);
+
+    // Emitir evento de creación (estado inicial)
+    this.auditClient.emit('recup_prestamo.estado.cambiado', {
+      prestamoId: saved.prestamoId,
+      estadoAnterior: null,
+      estadoNuevo: saved.recup_estado || 'SOLICITADO',
+      fechaCambio: new Date(),
+      comentario: 'Préstamo creado',
+    });
+
+    return saved;
   }
 
   async findAll(): Promise<Recup_Prestamo[]> {
@@ -36,8 +50,23 @@ export class PrestamosService {
 
   async update(id: number, updatePrestamoDto: UpdateRecupPrestamoDto): Promise<Recup_Prestamo> {
     const prestamo = await this.findOne(id);
+    const estadoAnterior = prestamo.recup_estado;
+
     Object.assign(prestamo, updatePrestamoDto);
-    return await this.prestamoRepository.save(prestamo);
+    const updated = await this.prestamoRepository.save(prestamo);
+
+    // Emitir evento si el estado cambió
+    if (updatePrestamoDto.recup_estado && estadoAnterior !== updatePrestamoDto.recup_estado) {
+      this.auditClient.emit('recup_prestamo.estado.cambiado', {
+        prestamoId: updated.prestamoId,
+        estadoAnterior: estadoAnterior,
+        estadoNuevo: updatePrestamoDto.recup_estado,
+        fechaCambio: new Date(),
+        comentario: `Estado cambiado de ${estadoAnterior} a ${updatePrestamoDto.recup_estado}`,
+      });
+    }
+
+    return updated;
   }
 
   async remove(id: number): Promise<void> {

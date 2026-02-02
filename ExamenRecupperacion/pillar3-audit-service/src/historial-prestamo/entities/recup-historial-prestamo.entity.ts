@@ -8,7 +8,7 @@ export class RecupHistorialPrestamo {
   @Column()
   recup_prestamoId: number;
 
-  @Column()
+  @Column({ nullable: true })
   recup_estadoAnterior: string;
 
   @Column()
